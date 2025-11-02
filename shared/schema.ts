@@ -48,8 +48,8 @@ export const VARIETIES = [
   "MATTH IRON ROSE",
   "MATTH IRON PURPLE",
   "MATTH GEM",
-  "MATTH YELLOW",
-  "MATTH WHITE",
+  "MATTH IRON YELLOW",
+  "MATTH IRON WHITE",
 ] as const;
 
 export const STEM_LENGTHS = [50, 55, 60, 65, 70, 75] as const;
@@ -61,8 +61,8 @@ export const DESTINATIONS = [
 ] as const;
 
 export const TAGS = [
-  "TAG5 (GIALLO)",
-  "TAG5 (VERDE)",
+  "TAG-5 (Giallo)",
+  "TAG-5 (VERDE)",
 ] as const;
 
 export const BUCKET_TYPES = [
