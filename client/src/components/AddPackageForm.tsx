@@ -34,22 +34,22 @@ export default function AddPackageForm({ onAddPackage, disabled }: AddPackageFor
   const isValid = variety && length && quantity && parseInt(quantity) > 0;
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Aggiungi Pacco</CardTitle>
+    <Card className="w-full sticky top-[120px] md:top-0 md:relative z-30 shadow-lg md:shadow-sm">
+      <CardHeader className="pb-3 md:pb-6">
+        <CardTitle className="text-lg md:text-xl">Aggiungi Pacco</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="variety" data-testid="label-variety">Varietà *</Label>
+              <Label htmlFor="variety" className="text-base md:text-sm" data-testid="label-variety">Varietà *</Label>
               <Select value={variety} onValueChange={setVariety} disabled={disabled}>
-                <SelectTrigger id="variety" data-testid="select-variety">
+                <SelectTrigger id="variety" className="h-12 md:h-11 text-base" data-testid="select-variety">
                   <SelectValue placeholder="Seleziona varietà" />
                 </SelectTrigger>
                 <SelectContent>
                   {VARIETIES.map((v) => (
-                    <SelectItem key={v} value={v} data-testid={`option-variety-${v}`}>
+                    <SelectItem key={v} value={v} className="text-base py-3" data-testid={`option-variety-${v}`}>
                       {v}
                     </SelectItem>
                   ))}
@@ -57,44 +57,48 @@ export default function AddPackageForm({ onAddPackage, disabled }: AddPackageFor
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="length" data-testid="label-length">Lunghezza (cm) *</Label>
-              <Select value={length} onValueChange={setLength} disabled={disabled}>
-                <SelectTrigger id="length" data-testid="select-length">
-                  <SelectValue placeholder="Seleziona" />
-                </SelectTrigger>
-                <SelectContent>
-                  {STEM_LENGTHS.map((l) => (
-                    <SelectItem key={l} value={l.toString()} data-testid={`option-length-${l}`}>
-                      {l} cm
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="length" className="text-base md:text-sm" data-testid="label-length">Lunghezza (cm) *</Label>
+                <Select value={length} onValueChange={setLength} disabled={disabled}>
+                  <SelectTrigger id="length" className="h-12 md:h-11 text-base" data-testid="select-length">
+                    <SelectValue placeholder="cm" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STEM_LENGTHS.map((l) => (
+                      <SelectItem key={l} value={l.toString()} className="text-base py-3" data-testid={`option-length-${l}`}>
+                        {l} cm
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="quantity" data-testid="label-quantity">Quantità *</Label>
-              <Input
-                id="quantity"
-                type="number"
-                min="1"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                placeholder="0"
-                disabled={disabled}
-                data-testid="input-quantity"
-              />
+              <div className="space-y-2">
+                <Label htmlFor="quantity" className="text-base md:text-sm" data-testid="label-quantity">Quantità *</Label>
+                <Input
+                  id="quantity"
+                  type="number"
+                  min="1"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  placeholder="0"
+                  disabled={disabled}
+                  className="h-12 md:h-11 text-base"
+                  data-testid="input-quantity"
+                />
+              </div>
             </div>
           </div>
 
           <Button
             type="submit"
             disabled={!isValid || disabled}
-            className="w-full md:w-auto"
+            className="w-full h-12 md:h-11 text-base md:text-sm"
+            size="lg"
             data-testid="button-add-package"
           >
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="mr-2 h-5 w-5" />
             Aggiungi Pacco
           </Button>
         </form>

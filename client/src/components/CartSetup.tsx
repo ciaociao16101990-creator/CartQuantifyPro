@@ -44,16 +44,16 @@ export default function CartSetup({ onStartCart }: CartSetupProps) {
         <CardDescription>Configura i dettagli del carrello (72 pacchi predefinito)</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="destination" data-testid="label-destination">Destinazione *</Label>
+            <Label htmlFor="destination" className="text-base md:text-sm" data-testid="label-destination">Destinazione *</Label>
             <Select value={destination} onValueChange={setDestination}>
-              <SelectTrigger id="destination" data-testid="select-destination">
+              <SelectTrigger id="destination" className="h-12 md:h-11 text-base" data-testid="select-destination">
                 <SelectValue placeholder="Seleziona destinazione" />
               </SelectTrigger>
               <SelectContent>
                 {DESTINATIONS.map((dest) => (
-                  <SelectItem key={dest} value={dest} data-testid={`option-destination-${dest}`}>
+                  <SelectItem key={dest} value={dest} className="text-base py-3" data-testid={`option-destination-${dest}`}>
                     {dest}
                   </SelectItem>
                 ))}
@@ -62,14 +62,14 @@ export default function CartSetup({ onStartCart }: CartSetupProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="tag" data-testid="label-tag">Tag *</Label>
+            <Label htmlFor="tag" className="text-base md:text-sm" data-testid="label-tag">Tag *</Label>
             <Select value={tag} onValueChange={setTag}>
-              <SelectTrigger id="tag" data-testid="select-tag">
+              <SelectTrigger id="tag" className="h-12 md:h-11 text-base" data-testid="select-tag">
                 <SelectValue placeholder="Seleziona tag" />
               </SelectTrigger>
               <SelectContent>
                 {TAGS.map((t) => (
-                  <SelectItem key={t} value={t} data-testid={`option-tag-${t}`}>
+                  <SelectItem key={t} value={t} className="text-base py-3" data-testid={`option-tag-${t}`}>
                     {t}
                   </SelectItem>
                 ))}
@@ -79,26 +79,26 @@ export default function CartSetup({ onStartCart }: CartSetupProps) {
         </div>
 
         <div className="space-y-4">
-          <Label data-testid="label-bucket-type">Tipo Bucket *</Label>
+          <Label className="text-base md:text-sm" data-testid="label-bucket-type">Tipo Bucket *</Label>
           <RadioGroup value={bucketTypeMode} onValueChange={(v) => setBucketTypeMode(v as "preset" | "custom")}>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="preset" id="preset" data-testid="radio-preset" />
-              <Label htmlFor="preset" className="font-normal">Tipo predefinito</Label>
+            <div className="flex items-center space-x-2 py-1">
+              <RadioGroupItem value="preset" id="preset" className="h-5 w-5" data-testid="radio-preset" />
+              <Label htmlFor="preset" className="font-normal text-base md:text-sm">Tipo predefinito</Label>
             </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="custom" id="custom" data-testid="radio-custom" />
-              <Label htmlFor="custom" className="font-normal">Tipo personalizzato</Label>
+            <div className="flex items-center space-x-2 py-1">
+              <RadioGroupItem value="custom" id="custom" className="h-5 w-5" data-testid="radio-custom" />
+              <Label htmlFor="custom" className="font-normal text-base md:text-sm">Tipo personalizzato</Label>
             </div>
           </RadioGroup>
 
           {bucketTypeMode === "preset" ? (
             <Select value={bucketType} onValueChange={setBucketType}>
-              <SelectTrigger data-testid="select-bucket-type">
+              <SelectTrigger className="h-12 md:h-11 text-base" data-testid="select-bucket-type">
                 <SelectValue placeholder="Seleziona tipo bucket" />
               </SelectTrigger>
               <SelectContent>
                 {BUCKET_TYPES.map((type) => (
-                  <SelectItem key={type} value={type} data-testid={`option-bucket-${type}`}>
+                  <SelectItem key={type} value={type} className="text-base py-3" data-testid={`option-bucket-${type}`}>
                     {type}
                   </SelectItem>
                 ))}
@@ -109,6 +109,7 @@ export default function CartSetup({ onStartCart }: CartSetupProps) {
               value={customBucketType}
               onChange={(e) => setCustomBucketType(e.target.value)}
               placeholder="Inserisci tipo bucket personalizzato"
+              className="h-12 md:h-11 text-base"
               data-testid="input-custom-bucket"
             />
           )}
@@ -117,7 +118,7 @@ export default function CartSetup({ onStartCart }: CartSetupProps) {
         <Button
           onClick={handleStartCart}
           disabled={!isValid}
-          className="w-full"
+          className="w-full h-14 md:h-11 text-base md:text-sm"
           size="lg"
           data-testid="button-start-cart"
         >

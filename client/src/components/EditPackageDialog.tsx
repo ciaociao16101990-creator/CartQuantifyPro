@@ -43,22 +43,22 @@ export default function EditPackageDialog({ open, onOpenChange, package: pkg, on
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent data-testid="dialog-edit-package">
+      <DialogContent className="max-w-[95vw] md:max-w-md" data-testid="dialog-edit-package">
         <DialogHeader>
-          <DialogTitle>Modifica Pacco</DialogTitle>
+          <DialogTitle className="text-xl">Modifica Pacco</DialogTitle>
           <DialogDescription>Aggiorna i dettagli del pacco</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="edit-variety">Varietà</Label>
+            <Label htmlFor="edit-variety" className="text-base md:text-sm">Varietà</Label>
             <Select value={variety} onValueChange={setVariety}>
-              <SelectTrigger id="edit-variety" data-testid="select-edit-variety">
+              <SelectTrigger id="edit-variety" className="h-12 md:h-11 text-base" data-testid="select-edit-variety">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {VARIETIES.map((v) => (
-                  <SelectItem key={v} value={v}>
+                  <SelectItem key={v} value={v} className="text-base py-3">
                     {v}
                   </SelectItem>
                 ))}
@@ -67,14 +67,14 @@ export default function EditPackageDialog({ open, onOpenChange, package: pkg, on
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="edit-length">Lunghezza (cm)</Label>
+            <Label htmlFor="edit-length" className="text-base md:text-sm">Lunghezza (cm)</Label>
             <Select value={length} onValueChange={setLength}>
-              <SelectTrigger id="edit-length" data-testid="select-edit-length">
+              <SelectTrigger id="edit-length" className="h-12 md:h-11 text-base" data-testid="select-edit-length">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {STEM_LENGTHS.map((l) => (
-                  <SelectItem key={l} value={l.toString()}>
+                  <SelectItem key={l} value={l.toString()} className="text-base py-3">
                     {l} cm
                   </SelectItem>
                 ))}
@@ -83,23 +83,34 @@ export default function EditPackageDialog({ open, onOpenChange, package: pkg, on
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="edit-quantity">Quantità</Label>
+            <Label htmlFor="edit-quantity" className="text-base md:text-sm">Quantità</Label>
             <Input
               id="edit-quantity"
               type="number"
               min="1"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
+              className="h-12 md:h-11 text-base"
               data-testid="input-edit-quantity"
             />
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} data-testid="button-cancel-edit">
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button 
+            variant="outline" 
+            onClick={() => onOpenChange(false)} 
+            className="h-12 md:h-11 text-base md:text-sm w-full sm:w-auto"
+            data-testid="button-cancel-edit"
+          >
             Annulla
           </Button>
-          <Button onClick={handleSave} disabled={!isValid} data-testid="button-save-edit">
+          <Button 
+            onClick={handleSave} 
+            disabled={!isValid} 
+            className="h-12 md:h-11 text-base md:text-sm w-full sm:w-auto"
+            data-testid="button-save-edit"
+          >
             Salva Modifiche
           </Button>
         </DialogFooter>

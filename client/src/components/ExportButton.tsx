@@ -21,12 +21,12 @@ export default function ExportButton({ onExport, disabled, cartCount }: ExportBu
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-4 left-4 right-4 md:bottom-6 md:right-6 md:left-auto z-50">
       <Button
         onClick={handleExport}
         disabled={disabled || isExporting || cartCount === 0}
         size="lg"
-        className="shadow-lg"
+        className="w-full md:w-auto shadow-lg h-14 md:h-11 text-base md:text-sm"
         data-testid="button-export-all"
       >
         {isExporting ? (

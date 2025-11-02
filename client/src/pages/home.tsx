@@ -7,7 +7,6 @@ import EditPackageDialog from "@/components/EditPackageDialog";
 import CompletedCarts, { type CompletedCart } from "@/components/CompletedCarts";
 import ExportButton from "@/components/ExportButton";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle2 } from "lucide-react";
 
 interface CartSetupData {
   destination: string;
@@ -144,12 +143,12 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-6 max-w-6xl space-y-6">
+    <div className="min-h-screen bg-background pb-24 md:pb-6">
+      <div className="container mx-auto px-3 md:px-4 py-4 md:py-6 max-w-6xl space-y-4 md:space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Gestione Carrelli</h1>
-            <p className="text-muted-foreground">Sistema di tracciamento pacchi fiori</p>
+            <h1 className="text-2xl md:text-3xl font-bold">Gestione Carrelli</h1>
+            <p className="text-sm md:text-base text-muted-foreground">Sistema di tracciamento pacchi fiori</p>
           </div>
         </div>
 

@@ -41,7 +41,7 @@ export default function PackageList({ packages, onEdit, onDelete }: PackageListP
         <CardTitle>Lista Pacchi</CardTitle>
         <CardDescription>{packages.length} {packages.length === 1 ? 'pacco' : 'pacchi'} nel carrello</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pb-20 md:pb-6">
         <div className="hidden md:block">
           <Table>
             <TableHeader>
@@ -95,35 +95,37 @@ export default function PackageList({ packages, onEdit, onDelete }: PackageListP
             <Card key={pkg.id} data-testid={`card-package-${pkg.id}`}>
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1">
-                    <h4 className="font-semibold mb-1" data-testid={`text-variety-mobile-${pkg.id}`}>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold mb-2 text-base" data-testid={`text-variety-mobile-${pkg.id}`}>
                       {pkg.variety}
                     </h4>
                     <div className="flex gap-2 flex-wrap">
-                      <Badge variant="outline" data-testid={`text-length-mobile-${pkg.id}`}>
+                      <Badge variant="outline" className="text-sm" data-testid={`text-length-mobile-${pkg.id}`}>
                         {pkg.length} cm
                       </Badge>
-                      <Badge data-testid={`text-quantity-mobile-${pkg.id}`}>
+                      <Badge className="text-sm" data-testid={`text-quantity-mobile-${pkg.id}`}>
                         Qty: {pkg.quantity}
                       </Badge>
                     </div>
                   </div>
-                  <div className="flex gap-1">
+                  <div className="flex gap-2 flex-shrink-0">
                     <Button
                       size="icon"
                       variant="ghost"
+                      className="h-11 w-11"
                       onClick={() => onEdit(pkg)}
                       data-testid={`button-edit-mobile-${pkg.id}`}
                     >
-                      <Pencil className="h-4 w-4" />
+                      <Pencil className="h-5 w-5" />
                     </Button>
                     <Button
                       size="icon"
                       variant="ghost"
+                      className="h-11 w-11"
                       onClick={() => onDelete(pkg.id)}
                       data-testid={`button-delete-mobile-${pkg.id}`}
                     >
-                      <Trash2 className="h-4 w-4 text-destructive" />
+                      <Trash2 className="h-5 w-5 text-destructive" />
                     </Button>
                   </div>
                 </div>

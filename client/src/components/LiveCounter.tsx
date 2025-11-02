@@ -25,86 +25,112 @@ export default function LiveCounter({
   const isComplete = current >= total;
 
   return (
-    <Card className="w-full">
-      <CardContent className="p-6">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex-1 text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-              <Package className="h-5 w-5 text-muted-foreground" />
-              <h3 className="text-lg font-semibold">Carrello {cartNumber}</h3>
+    <Card className="w-full sticky top-0 z-40 shadow-lg">
+      <CardContent className="p-4 md:p-6">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Package className="h-6 w-6 md:h-5 md:w-5 text-muted-foreground flex-shrink-0" />
+              <h3 className="text-xl md:text-lg font-semibold">Carrello {cartNumber}</h3>
             </div>
             
-            {destination && (
-              <div className="flex flex-wrap gap-2 justify-center md:justify-start mt-3">
-                <Badge variant="secondary" className="gap-1" data-testid="badge-destination">
-                  <MapPin className="h-3 w-3" />
-                  {destination}
-                </Badge>
-                {tag && (
-                  <Badge variant="secondary" className="gap-1" data-testid="badge-tag">
-                    <Tag className="h-3 w-3" />
-                    {tag}
-                  </Badge>
-                )}
-                {bucketType && (
-                  <Badge variant="secondary" className="gap-1" data-testid="badge-bucket">
-                    <Database className="h-3 w-3" />
-                    {bucketType}
-                  </Badge>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div className="flex items-center gap-6">
-            <div className="text-center">
-              <div 
-                className={cn(
-                  "text-4xl md:text-5xl font-bold tabular-nums",
-                  isComplete && "text-green-600 dark:text-green-500",
-                  isNearComplete && "text-amber-600 dark:text-amber-500"
-                )}
-                data-testid="text-counter"
-              >
-                {current} <span className="text-muted-foreground">/ {total}</span>
-              </div>
-              <p className="text-sm text-muted-foreground mt-1">pacchi</p>
-            </div>
-
-            <div className="relative h-24 w-24">
-              <svg className="transform -rotate-90 h-24 w-24">
-                <circle
-                  cx="48"
-                  cy="48"
-                  r="40"
-                  stroke="currentColor"
-                  strokeWidth="8"
-                  fill="none"
-                  className="text-muted/20"
-                />
-                <circle
-                  cx="48"
-                  cy="48"
-                  r="40"
-                  stroke="currentColor"
-                  strokeWidth="8"
-                  fill="none"
-                  strokeDasharray={`${2 * Math.PI * 40}`}
-                  strokeDashoffset={`${2 * Math.PI * 40 * (1 - percentage / 100)}`}
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <div 
                   className={cn(
-                    "transition-all duration-300",
+                    "text-3xl md:text-5xl font-bold tabular-nums leading-none",
                     isComplete && "text-green-600 dark:text-green-500",
-                    isNearComplete && "text-amber-600 dark:text-amber-500",
-                    !isComplete && !isNearComplete && "text-primary"
+                    isNearComplete && "text-amber-600 dark:text-amber-500"
                   )}
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-lg font-semibold tabular-nums">{Math.round(percentage)}%</span>
+                  data-testid="text-counter"
+                >
+                  {current}<span className="text-xl md:text-3xl text-muted-foreground">/{total}</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">pacchi</p>
+              </div>
+
+              <div className="relative h-20 w-20 md:h-24 md:w-24 flex-shrink-0">
+                <svg className="transform -rotate-90 h-20 w-20 md:h-24 md:w-24">
+                  <circle
+                    cx="40"
+                    cy="40"
+                    r="34"
+                    stroke="currentColor"
+                    strokeWidth="7"
+                    fill="none"
+                    className="text-muted/20 md:hidden"
+                  />
+                  <circle
+                    cx="40"
+                    cy="40"
+                    r="34"
+                    stroke="currentColor"
+                    strokeWidth="7"
+                    fill="none"
+                    strokeDasharray={`${2 * Math.PI * 34}`}
+                    strokeDashoffset={`${2 * Math.PI * 34 * (1 - percentage / 100)}`}
+                    className={cn(
+                      "transition-all duration-300 md:hidden",
+                      isComplete && "text-green-600 dark:text-green-500",
+                      isNearComplete && "text-amber-600 dark:text-amber-500",
+                      !isComplete && !isNearComplete && "text-primary"
+                    )}
+                    strokeLinecap="round"
+                  />
+                  <circle
+                    cx="48"
+                    cy="48"
+                    r="40"
+                    stroke="currentColor"
+                    strokeWidth="8"
+                    fill="none"
+                    className="text-muted/20 hidden md:block"
+                  />
+                  <circle
+                    cx="48"
+                    cy="48"
+                    r="40"
+                    stroke="currentColor"
+                    strokeWidth="8"
+                    fill="none"
+                    strokeDasharray={`${2 * Math.PI * 40}`}
+                    strokeDashoffset={`${2 * Math.PI * 40 * (1 - percentage / 100)}`}
+                    className={cn(
+                      "transition-all duration-300 hidden md:block",
+                      isComplete && "text-green-600 dark:text-green-500",
+                      isNearComplete && "text-amber-600 dark:text-amber-500",
+                      !isComplete && !isNearComplete && "text-primary"
+                    )}
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-base md:text-lg font-semibold tabular-nums">{Math.round(percentage)}%</span>
+                </div>
               </div>
             </div>
           </div>
+          
+          {destination && (
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="secondary" className="gap-1 text-xs" data-testid="badge-destination">
+                <MapPin className="h-3 w-3" />
+                {destination}
+              </Badge>
+              {tag && (
+                <Badge variant="secondary" className="gap-1 text-xs" data-testid="badge-tag">
+                  <Tag className="h-3 w-3" />
+                  {tag}
+                </Badge>
+              )}
+              {bucketType && (
+                <Badge variant="secondary" className="gap-1 text-xs" data-testid="badge-bucket">
+                  <Database className="h-3 w-3" />
+                  {bucketType}
+                </Badge>
+              )}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
