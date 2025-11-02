@@ -45,10 +45,11 @@ export default function Home() {
     queryKey: ['/api/carts'],
   });
 
-  // Fetch current cart packages
+  // Fetch current cart packages with polling to detect backend auto-completion
   const { data: currentCartData } = useQuery<CartWithPackages>({
     queryKey: ['/api/carts', currentCartId],
     enabled: !!currentCartId,
+    refetchInterval: currentCartId ? 2000 : false, // Poll every 2 seconds
   });
 
   const currentCart = currentCartData;
@@ -61,18 +62,16 @@ export default function Home() {
   // Create cart mutation
   const createCartMutation = useMutation({
     mutationFn: async (setup: CartSetupData) => {
-      return await apiRequest<Cart>('/api/carts', {
-        method: 'POST',
-        body: JSON.stringify({
-          cartNumber: currentCartNumber,
-          destination: setup.destination,
-          tag: setup.tag,
-          bucketType: setup.bucketType,
-          totalPackages: 0,
-          maxPackages: 72,
-          isCompleted: 0,
-        }),
+      const res = await apiRequest('POST', '/api/carts', {
+        cartNumber: currentCartNumber,
+        destination: setup.destination,
+        tag: setup.tag,
+        bucketType: setup.bucketType,
+        totalPackages: 0,
+        maxPackages: 72,
+        isCompleted: 0,
       });
+      return await res.json() as Cart;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/carts'] });
@@ -90,13 +89,11 @@ export default function Home() {
     mutationFn: async (pkg: { variety: string; length: number; quantity: number }) => {
       if (!currentCartId) throw new Error("No cart selected");
       
-      return await apiRequest<Package>('/api/packages', {
-        method: 'POST',
-        body: JSON.stringify({
-          cartId: currentCartId,
-          ...pkg,
-        }),
+      const res = await apiRequest('POST', '/api/packages', {
+        cartId: currentCartId,
+        ...pkg,
       });
+      return await res.json() as Package;
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['/api/carts'] });
@@ -112,14 +109,12 @@ export default function Home() {
   // Update package mutation
   const updatePackageMutation = useMutation({
     mutationFn: async (pkg: PackageItem) => {
-      return await apiRequest<Package>(`/api/packages/${pkg.id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({
-          variety: pkg.variety,
-          length: pkg.length,
-          quantity: pkg.quantity,
-        }),
+      const res = await apiRequest('PATCH', `/api/packages/${pkg.id}`, {
+        variety: pkg.variety,
+        length: pkg.length,
+        quantity: pkg.quantity,
       });
+      return await res.json() as Package;
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['/api/carts'] });
@@ -136,9 +131,7 @@ export default function Home() {
   // Delete package mutation
   const deletePackageMutation = useMutation({
     mutationFn: async (packageId: string) => {
-      return await apiRequest(`/api/packages/${packageId}`, {
-        method: 'DELETE',
-      });
+      await apiRequest('DELETE', `/api/packages/${packageId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/carts'] });
@@ -151,45 +144,26 @@ export default function Home() {
     },
   });
 
-  // Complete cart mutation
-  const completeCartMutation = useMutation({
-    mutationFn: async (cartId: string) => {
-      return await apiRequest<Cart>(`/api/carts/${cartId}`, {
-        method: 'PATCH',
-        body: JSON.stringify({
-          isCompleted: 1,
-          completedAt: new Date().toISOString(),
-        }),
-      });
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/carts'] });
-      setCurrentCartId(null);
-      
+
+  // Check if current cart was auto-completed by backend
+  useEffect(() => {
+    if (currentCart && currentCart.isCompleted === 1) {
+      // Cart was completed, show toast
       toast({
-        title: `Carrello ${data.cartNumber} completato! ✓`,
-        description: `Automaticamente avviato Carrello ${data.cartNumber + 1}`,
+        title: `Carrello ${currentCart.cartNumber} completato! ✓`,
+        description: `Automaticamente avviato Carrello ${currentCart.cartNumber + 1}`,
       });
       
       // Auto-start new cart with same settings
-      if (currentCart) {
+      setTimeout(() => {
         createCartMutation.mutate({
           destination: currentCart.destination,
           tag: currentCart.tag,
           bucketType: currentCart.bucketType,
         });
-      }
-    },
-  });
-
-  // Check if cart should be completed
-  useEffect(() => {
-    if (currentCart && currentTotal >= maxPackages && currentCart.isCompleted === 0) {
-      setTimeout(() => {
-        completeCartMutation.mutate(currentCart.id);
       }, 500);
     }
-  }, [currentTotal, maxPackages, currentCart]);
+  }, [currentCart?.isCompleted]);
 
   const handleStartCart = (setup: CartSetupData) => {
     createCartMutation.mutate(setup);

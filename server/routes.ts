@@ -62,9 +62,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update cart
   app.patch("/api/carts/:id", async (req, res) => {
     try {
+      // Validate update data
+      const updateSchema = insertCartSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
+      
       const [updatedCart] = await db
         .update(carts)
-        .set(req.body)
+        .set(validatedData)
         .where(eq(carts.id, req.params.id))
         .returning();
       
@@ -110,10 +114,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       if (cart) {
-        const totalPackages = cart.packages.reduce((sum, pkg) => sum + pkg.quantity, 0);
+        const totalPackages = cart.packages.reduce((sum: number, pkg) => sum + pkg.quantity, 0);
+        
+        // Auto-complete cart if it reaches max packages
+        const updateData: any = { totalPackages };
+        if (totalPackages >= cart.maxPackages && cart.isCompleted === 0) {
+          updateData.isCompleted = 1;
+          updateData.completedAt = new Date();
+        }
+        
         await db
           .update(carts)
-          .set({ totalPackages })
+          .set(updateData)
           .where(eq(carts.id, validatedData.cartId));
       }
       
@@ -127,9 +139,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update package
   app.patch("/api/packages/:id", async (req, res) => {
     try {
+      // Validate update data
+      const updateSchema = insertPackageSchema.partial().omit({ cartId: true });
+      const validatedData = updateSchema.parse(req.body);
+      
       const [updatedPackage] = await db
         .update(packages)
-        .set(req.body)
+        .set(validatedData)
         .where(eq(packages.id, req.params.id))
         .returning();
       
@@ -146,10 +162,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       if (cart) {
-        const totalPackages = cart.packages.reduce((sum, pkg) => sum + pkg.quantity, 0);
+        const totalPackages = cart.packages.reduce((sum: number, pkg) => sum + pkg.quantity, 0);
+        
+        // Auto-complete cart if it reaches max packages
+        const updateData: any = { totalPackages };
+        if (totalPackages >= cart.maxPackages && cart.isCompleted === 0) {
+          updateData.isCompleted = 1;
+          updateData.completedAt = new Date();
+        }
+        
         await db
           .update(carts)
-          .set({ totalPackages })
+          .set(updateData)
           .where(eq(carts.id, updatedPackage.cartId));
       }
       
@@ -182,7 +206,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       if (cart) {
-        const totalPackages = cart.packages.reduce((sum, p) => sum + p.quantity, 0);
+        const totalPackages = cart.packages.reduce((sum: number, p) => sum + p.quantity, 0);
         await db
           .update(carts)
           .set({ totalPackages })
