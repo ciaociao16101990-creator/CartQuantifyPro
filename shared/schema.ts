@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { sql, relations } from "drizzle-orm";
 import { pgTable, text, varchar, integer, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -24,6 +24,17 @@ export const packages = pgTable("packages", {
   quantity: integer("quantity").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
+
+export const cartsRelations = relations(carts, ({ many }) => ({
+  packages: many(packages),
+}));
+
+export const packagesRelations = relations(packages, ({ one }) => ({
+  cart: one(carts, {
+    fields: [packages.cartId],
+    references: [carts.id],
+  }),
+}));
 
 export const insertCartSchema = createInsertSchema(carts).omit({
   id: true,

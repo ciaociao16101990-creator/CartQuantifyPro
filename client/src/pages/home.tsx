@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import CartSetup from "@/components/CartSetup";
 import LiveCounter from "@/components/LiveCounter";
 import AddPackageForm from "@/components/AddPackageForm";
@@ -8,7 +9,8 @@ import CompletedCarts, { type CompletedCart } from "@/components/CompletedCarts"
 import ExportButton from "@/components/ExportButton";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Settings, ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,6 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import type { Cart, Package } from "@shared/schema";
 
 interface CartSetupData {
   destination: string;
@@ -26,28 +29,170 @@ interface CartSetupData {
   bucketType: string;
 }
 
+type CartWithPackages = Cart & { packages: Package[] };
+
 export default function Home() {
   const { toast } = useToast();
   
   const [cartStarted, setCartStarted] = useState(false);
-  const [currentCart, setCurrentCart] = useState<CartSetupData | null>(null);
-  const [currentCartNumber, setCurrentCartNumber] = useState(1);
-  const [packages, setPackages] = useState<PackageItem[]>([]);
-  const [completedCarts, setCompletedCarts] = useState<CompletedCart[]>([]);
+  const [currentCartId, setCurrentCartId] = useState<string | null>(null);
   const [editingPackage, setEditingPackage] = useState<PackageItem | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
 
+  // Fetch all carts
+  const { data: allCarts = [] } = useQuery<CartWithPackages[]>({
+    queryKey: ['/api/carts'],
+  });
+
+  // Fetch current cart packages
+  const { data: currentCartData } = useQuery<CartWithPackages>({
+    queryKey: ['/api/carts', currentCartId],
+    enabled: !!currentCartId,
+  });
+
+  const currentCart = currentCartData;
+  const packages = currentCart?.packages || [];
   const currentTotal = packages.reduce((sum, pkg) => sum + pkg.quantity, 0);
-  const maxPackages = 72;
+  const maxPackages = currentCart?.maxPackages || 72;
+  const completedCarts = allCarts.filter(c => c.isCompleted === 1);
+  const currentCartNumber = allCarts.length + 1;
+
+  // Create cart mutation
+  const createCartMutation = useMutation({
+    mutationFn: async (setup: CartSetupData) => {
+      return await apiRequest<Cart>('/api/carts', {
+        method: 'POST',
+        body: JSON.stringify({
+          cartNumber: currentCartNumber,
+          destination: setup.destination,
+          tag: setup.tag,
+          bucketType: setup.bucketType,
+          totalPackages: 0,
+          maxPackages: 72,
+          isCompleted: 0,
+        }),
+      });
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/carts'] });
+      setCurrentCartId(data.id);
+      setCartStarted(true);
+      toast({
+        title: "Carrello avviato",
+        description: `Carrello ${data.cartNumber} pronto per l'aggiunta di pacchi`,
+      });
+    },
+  });
+
+  // Add package mutation
+  const addPackageMutation = useMutation({
+    mutationFn: async (pkg: { variety: string; length: number; quantity: number }) => {
+      if (!currentCartId) throw new Error("No cart selected");
+      
+      return await apiRequest<Package>('/api/packages', {
+        method: 'POST',
+        body: JSON.stringify({
+          cartId: currentCartId,
+          ...pkg,
+        }),
+      });
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/carts'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/carts', currentCartId] });
+      
+      toast({
+        title: "Pacco aggiunto",
+        description: `${variables.variety} - ${variables.length}cm (Qty: ${variables.quantity})`,
+      });
+    },
+  });
+
+  // Update package mutation
+  const updatePackageMutation = useMutation({
+    mutationFn: async (pkg: PackageItem) => {
+      return await apiRequest<Package>(`/api/packages/${pkg.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          variety: pkg.variety,
+          length: pkg.length,
+          quantity: pkg.quantity,
+        }),
+      });
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/carts'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/carts', currentCartId] });
+      setShowEditDialog(false);
+      
+      toast({
+        title: "Pacco aggiornato",
+        description: `${variables.variety} - ${variables.length}cm (Qty: ${variables.quantity})`,
+      });
+    },
+  });
+
+  // Delete package mutation
+  const deletePackageMutation = useMutation({
+    mutationFn: async (packageId: string) => {
+      return await apiRequest(`/api/packages/${packageId}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/carts'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/carts', currentCartId] });
+      
+      toast({
+        title: "Pacco eliminato",
+        description: "Il pacco è stato rimosso dal carrello",
+      });
+    },
+  });
+
+  // Complete cart mutation
+  const completeCartMutation = useMutation({
+    mutationFn: async (cartId: string) => {
+      return await apiRequest<Cart>(`/api/carts/${cartId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          isCompleted: 1,
+          completedAt: new Date().toISOString(),
+        }),
+      });
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/carts'] });
+      setCurrentCartId(null);
+      
+      toast({
+        title: `Carrello ${data.cartNumber} completato! ✓`,
+        description: `Automaticamente avviato Carrello ${data.cartNumber + 1}`,
+      });
+      
+      // Auto-start new cart with same settings
+      if (currentCart) {
+        createCartMutation.mutate({
+          destination: currentCart.destination,
+          tag: currentCart.tag,
+          bucketType: currentCart.bucketType,
+        });
+      }
+    },
+  });
+
+  // Check if cart should be completed
+  useEffect(() => {
+    if (currentCart && currentTotal >= maxPackages && currentCart.isCompleted === 0) {
+      setTimeout(() => {
+        completeCartMutation.mutate(currentCart.id);
+      }, 500);
+    }
+  }, [currentTotal, maxPackages, currentCart]);
 
   const handleStartCart = (setup: CartSetupData) => {
-    setCurrentCart(setup);
-    setCartStarted(true);
-    toast({
-      title: "Carrello avviato",
-      description: `Carrello ${currentCartNumber} pronto per l'aggiunta di pacchi`,
-    });
+    createCartMutation.mutate(setup);
   };
 
   const handleResetCart = () => {
@@ -60,8 +205,7 @@ export default function Home() {
 
   const confirmReset = () => {
     setCartStarted(false);
-    setCurrentCart(null);
-    setPackages([]);
+    setCurrentCartId(null);
     setShowResetDialog(false);
     toast({
       title: "Carrello resettato",
@@ -81,48 +225,7 @@ export default function Home() {
       return;
     }
 
-    const newPackage: PackageItem = {
-      id: Date.now().toString(),
-      ...pkg,
-    };
-
-    const updatedPackages = [...packages, newPackage];
-    setPackages(updatedPackages);
-
-    toast({
-      title: "Pacco aggiunto",
-      description: `${pkg.variety} - ${pkg.length}cm (Qty: ${pkg.quantity})`,
-    });
-
-    if (newTotal === maxPackages) {
-      setTimeout(() => {
-        completeCart(updatedPackages);
-      }, 500);
-    }
-  };
-
-  const completeCart = (finalPackages: PackageItem[]) => {
-    if (!currentCart) return;
-
-    const completedCart: CompletedCart = {
-      id: Date.now().toString(),
-      cartNumber: currentCartNumber,
-      destination: currentCart.destination,
-      tag: currentCart.tag,
-      bucketType: currentCart.bucketType,
-      totalPackages: finalPackages.reduce((sum, pkg) => sum + pkg.quantity, 0),
-      packages: finalPackages,
-      completedAt: new Date(),
-    };
-
-    setCompletedCarts([...completedCarts, completedCart]);
-    setPackages([]);
-    setCurrentCartNumber(currentCartNumber + 1);
-    
-    toast({
-      title: `Carrello ${currentCartNumber} completato! ✓`,
-      description: `Automaticamente avviato Carrello ${currentCartNumber + 1}`,
-    });
+    addPackageMutation.mutate(pkg);
   };
 
   const handleEditPackage = (pkg: PackageItem) => {
@@ -146,32 +249,37 @@ export default function Home() {
       return;
     }
 
-    setPackages(packages.map(p => p.id === updatedPkg.id ? updatedPkg : p));
-    setShowEditDialog(false);
-    
-    toast({
-      title: "Pacco aggiornato",
-      description: `${updatedPkg.variety} - ${updatedPkg.length}cm (Qty: ${updatedPkg.quantity})`,
-    });
+    updatePackageMutation.mutate(updatedPkg);
   };
 
   const handleDeletePackage = (id: string) => {
-    setPackages(packages.filter(p => p.id !== id));
-    toast({
-      title: "Pacco eliminato",
-      description: "Il pacco è stato rimosso dal carrello",
-    });
+    deletePackageMutation.mutate(id);
   };
 
   const handleExport = async () => {
-    console.log('Exporting all carts...', completedCarts);
-    
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    toast({
-      title: "Esportazione completata",
-      description: `${completedCarts.length} carrelli esportati con successo`,
-    });
+    try {
+      const response = await fetch('/api/export/excel');
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `carrelli_export_${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Esportazione completata",
+        description: `${completedCarts.length} carrelli esportati con successo`,
+      });
+    } catch (error) {
+      toast({
+        title: "Errore",
+        description: "Impossibile esportare i dati",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -199,15 +307,15 @@ export default function Home() {
 
         {!cartStarted ? (
           <CartSetup onStartCart={handleStartCart} />
-        ) : (
+        ) : currentCart ? (
           <>
             <LiveCounter
               current={currentTotal}
               total={maxPackages}
-              cartNumber={currentCartNumber}
-              destination={currentCart?.destination}
-              tag={currentCart?.tag}
-              bucketType={currentCart?.bucketType}
+              cartNumber={currentCart.cartNumber}
+              destination={currentCart.destination}
+              tag={currentCart.tag}
+              bucketType={currentCart.bucketType}
             />
 
             <AddPackageForm
@@ -216,15 +324,36 @@ export default function Home() {
             />
 
             <PackageList
-              packages={packages}
+              packages={packages.map(p => ({
+                id: p.id,
+                variety: p.variety,
+                length: p.length,
+                quantity: p.quantity,
+              }))}
               onEdit={handleEditPackage}
               onDelete={handleDeletePackage}
             />
           </>
-        )}
+        ) : null}
 
         {completedCarts.length > 0 && (
-          <CompletedCarts carts={completedCarts} />
+          <CompletedCarts 
+            carts={completedCarts.map(cart => ({
+              id: cart.id,
+              cartNumber: cart.cartNumber,
+              destination: cart.destination,
+              tag: cart.tag,
+              bucketType: cart.bucketType,
+              totalPackages: cart.totalPackages,
+              packages: cart.packages.map(p => ({
+                id: p.id,
+                variety: p.variety,
+                length: p.length,
+                quantity: p.quantity,
+              })),
+              completedAt: cart.completedAt ? new Date(cart.completedAt) : new Date(),
+            }))}
+          />
         )}
 
         <EditPackageDialog
