@@ -7,6 +7,18 @@ import EditPackageDialog from "@/components/EditPackageDialog";
 import CompletedCarts, { type CompletedCart } from "@/components/CompletedCarts";
 import ExportButton from "@/components/ExportButton";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Settings, ChevronLeft } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface CartSetupData {
   destination: string;
@@ -24,6 +36,7 @@ export default function Home() {
   const [completedCarts, setCompletedCarts] = useState<CompletedCart[]>([]);
   const [editingPackage, setEditingPackage] = useState<PackageItem | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showResetDialog, setShowResetDialog] = useState(false);
 
   const currentTotal = packages.reduce((sum, pkg) => sum + pkg.quantity, 0);
   const maxPackages = 72;
@@ -34,6 +47,25 @@ export default function Home() {
     toast({
       title: "Carrello avviato",
       description: `Carrello ${currentCartNumber} pronto per l'aggiunta di pacchi`,
+    });
+  };
+
+  const handleResetCart = () => {
+    if (packages.length > 0) {
+      setShowResetDialog(true);
+    } else {
+      confirmReset();
+    }
+  };
+
+  const confirmReset = () => {
+    setCartStarted(false);
+    setCurrentCart(null);
+    setPackages([]);
+    setShowResetDialog(false);
+    toast({
+      title: "Carrello resettato",
+      description: "Puoi configurare un nuovo carrello",
     });
   };
 
@@ -145,11 +177,24 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-6">
       <div className="container mx-auto px-3 md:px-4 py-4 md:py-6 max-w-6xl space-y-4 md:space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex-1 min-w-0">
             <h1 className="text-2xl md:text-3xl font-bold">Gestione Carrelli</h1>
             <p className="text-sm md:text-base text-muted-foreground">Sistema di tracciamento pacchi fiori</p>
           </div>
+          
+          {cartStarted && (
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={handleResetCart}
+              className="flex-shrink-0 h-12 md:h-11"
+              data-testid="button-back-to-setup"
+            >
+              <ChevronLeft className="h-5 w-5 md:mr-2" />
+              <span className="hidden md:inline">Modifica</span>
+            </Button>
+          )}
         </div>
 
         {!cartStarted ? (
@@ -188,6 +233,30 @@ export default function Home() {
           package={editingPackage}
           onSave={handleSaveEdit}
         />
+
+        <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+          <AlertDialogContent className="max-w-[95vw] md:max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-xl">Conferma Reset</AlertDialogTitle>
+              <AlertDialogDescription className="text-base">
+                Hai {packages.length} {packages.length === 1 ? 'pacco' : 'pacchi'} nel carrello corrente.
+                Tornare alla configurazione cancellerà tutti i pacchi non salvati. Sei sicuro?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="gap-2 sm:gap-0">
+              <AlertDialogCancel className="h-12 md:h-11 text-base md:text-sm">
+                Annulla
+              </AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={confirmReset}
+                className="h-12 md:h-11 text-base md:text-sm"
+                data-testid="button-confirm-reset"
+              >
+                Sì, Resetta
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         <ExportButton
           cartCount={completedCarts.length}
