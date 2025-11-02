@@ -61,7 +61,7 @@ export const DESTINATIONS = [
 ] as const;
 
 export const TAGS = [
-  "TAG-5 (Giallo)",
+  "TAG-6 (GIALLO)",
   "TAG-5 (VERDE)",
 ] as const;
 
