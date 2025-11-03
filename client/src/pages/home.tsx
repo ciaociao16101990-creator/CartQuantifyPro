@@ -39,6 +39,8 @@ export default function Home() {
   const [editingPackage, setEditingPackage] = useState<PackageItem | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
+  const [showCompletedDialog, setShowCompletedDialog] = useState(false);
+  const [completedCartData, setCompletedCartData] = useState<CartSetupData | null>(null);
 
   // Fetch all carts
   const { data: allCarts = [] } = useQuery<CartWithPackages[]>({
@@ -146,24 +148,17 @@ export default function Home() {
 
   // Check if current cart was auto-completed by backend
   useEffect(() => {
-    if (currentCart && currentCart.isCompleted === 1) {
-      // Cart was completed, show toast
-      toast({
-        variant: "success",
-        title: "Carrello completato!",
-        description: "Automaticamente avviato nuovo carrello",
+    if (currentCart && currentCart.isCompleted === 1 && !showCompletedDialog) {
+      // Save cart data for new cart creation
+      setCompletedCartData({
+        destination: currentCart.destination,
+        tag: currentCart.tag,
+        bucketType: currentCart.bucketType,
       });
-      
-      // Auto-start new cart with same settings
-      setTimeout(() => {
-        createCartMutation.mutate({
-          destination: currentCart.destination,
-          tag: currentCart.tag,
-          bucketType: currentCart.bucketType,
-        });
-      }, 500);
+      // Show completion dialog
+      setShowCompletedDialog(true);
     }
-  }, [currentCart?.isCompleted]);
+  }, [currentCart?.isCompleted, showCompletedDialog]);
 
   const handleStartCart = (setup: CartSetupData) => {
     createCartMutation.mutate(setup);
@@ -174,23 +169,26 @@ export default function Home() {
   };
 
   const confirmBackToSetup = async () => {
+    setShowResetDialog(false);
+    setCartStarted(false);
+    setCurrentCartId(null);
+    
     if (currentCartId) {
       try {
         await apiRequest('DELETE', `/api/carts/${currentCartId}`);
+        queryClient.invalidateQueries({ queryKey: ['/api/carts'] });
       } catch (error) {
         console.error("Error deleting cart:", error);
       }
     }
-    
-    queryClient.invalidateQueries({ queryKey: ['/api/carts'] });
-    setCartStarted(false);
-    setCurrentCartId(null);
-    setShowResetDialog(false);
-    toast({
-      variant: "default",
-      title: "Carrello interrotto",
-      description: "Puoi configurare un nuovo carrello",
-    });
+  };
+
+  const handleCompletedDialogConfirm = () => {
+    setShowCompletedDialog(false);
+    if (completedCartData) {
+      createCartMutation.mutate(completedCartData);
+      setCompletedCartData(null);
+    }
   };
 
   const handleAddPackage = (pkg: { variety: string; length: number; quantity: number }) => {
@@ -335,6 +333,26 @@ export default function Home() {
                 data-testid="button-confirm-back"
               >
                 Sì, Torna Indietro
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <AlertDialog open={showCompletedDialog} onOpenChange={setShowCompletedDialog}>
+          <AlertDialogContent className="max-w-[95vw] md:max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-xl">Carrello Completo!</AlertDialogTitle>
+              <AlertDialogDescription className="text-base">
+                HAI COMPLETATO 72 PACCHI, CARRELLO COMPLETO. PREMI OK PER INIZIARE UN NUOVO CARRELLO.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction 
+                onClick={handleCompletedDialogConfirm}
+                className="h-12 md:h-11 text-base md:text-sm w-full"
+                data-testid="button-confirm-completed"
+              >
+                OK
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
