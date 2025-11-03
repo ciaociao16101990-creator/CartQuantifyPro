@@ -178,7 +178,16 @@ export default function Home() {
     setShowResetDialog(true);
   };
 
-  const confirmBackToSetup = () => {
+  const confirmBackToSetup = async () => {
+    if (currentCartId) {
+      try {
+        await apiRequest('DELETE', `/api/carts/${currentCartId}`);
+      } catch (error) {
+        console.error("Error deleting cart:", error);
+      }
+    }
+    
+    queryClient.invalidateQueries({ queryKey: ['/api/carts'] });
     setCartStarted(false);
     setCurrentCartId(null);
     setShowResetDialog(false);

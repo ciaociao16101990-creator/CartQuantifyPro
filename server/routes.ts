@@ -220,7 +220,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Delete completed cart
+  // Delete cart (both completed and active)
   app.delete("/api/carts/:id", async (req, res) => {
     try {
       const cart = await db.query.carts.findFirst({
@@ -229,10 +229,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!cart) {
         return res.status(404).json({ error: "Carrello non trovato" });
-      }
-      
-      if (cart.isCompleted === 0) {
-        return res.status(400).json({ error: "Impossibile eliminare un carrello non completato" });
       }
       
       // Delete cart (packages will be deleted automatically due to CASCADE)
