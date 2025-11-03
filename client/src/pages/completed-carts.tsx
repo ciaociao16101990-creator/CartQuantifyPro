@@ -51,6 +51,8 @@ export default function CompletedCarts() {
     refetchInterval: 2000,
   });
 
+  const completedCarts = carts.filter(cart => cart.isCompleted === 1);
+
   const deleteMutation = useMutation({
     mutationFn: async (cartId: string) => {
       await apiRequest("DELETE", `/api/carts/${cartId}`);
@@ -100,8 +102,6 @@ export default function CompletedCarts() {
       });
     }
   };
-
-  const completedCarts = carts.filter(cart => cart.isCompleted === 1);
 
   if (isLoading) {
     return (
