@@ -265,6 +265,7 @@ export default function Home() {
               size="icon"
               onClick={() => setLocation("/carrelli-completati")}
               className="relative flex-shrink-0 h-12 w-12 md:h-11 md:w-11"
+              aria-label="Vedi carrelli completati"
               data-testid="button-view-completed-carts"
             >
               <ShoppingCart className="h-5 w-5" />
