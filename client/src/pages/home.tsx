@@ -8,7 +8,7 @@ import EditPackageDialog from "@/components/EditPackageDialog";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ShoppingCart, ArrowRight } from "lucide-react";
+import { ChevronLeft, ShoppingCart } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import {
@@ -238,7 +238,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24 md:pb-6">
+    <div className="min-h-screen bg-background pb-6">
       <div className="container mx-auto px-3 md:px-4 py-4 md:py-6 max-w-6xl space-y-4 md:space-y-6">
         <div className="flex items-center justify-between gap-3">
           <div className="flex-1 min-w-0">
@@ -246,18 +246,38 @@ export default function Home() {
             <p className="text-sm md:text-base text-muted-foreground">Sistema di tracciamento pacchi fiori</p>
           </div>
           
-          {cartStarted && (
+          <div className="flex items-center gap-2">
+            {cartStarted && (
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={handleResetCart}
+                className="flex-shrink-0 h-12 md:h-11"
+                data-testid="button-back-to-setup"
+              >
+                <ChevronLeft className="h-5 w-5 md:mr-2" />
+                <span className="hidden md:inline">Modifica</span>
+              </Button>
+            )}
+            
             <Button
               variant="outline"
-              size="lg"
-              onClick={handleResetCart}
-              className="flex-shrink-0 h-12 md:h-11"
-              data-testid="button-back-to-setup"
+              size="icon"
+              onClick={() => setLocation("/carrelli-completati")}
+              className="relative flex-shrink-0 h-12 w-12 md:h-11 md:w-11"
+              data-testid="button-view-completed-carts"
             >
-              <ChevronLeft className="h-5 w-5 md:mr-2" />
-              <span className="hidden md:inline">Modifica</span>
+              <ShoppingCart className="h-5 w-5" />
+              {completedCarts.length > 0 && (
+                <Badge 
+                  variant="default" 
+                  className="absolute -top-1 -right-1 h-5 min-w-5 flex items-center justify-center p-0 px-1 text-xs font-bold"
+                >
+                  {completedCarts.length}
+                </Badge>
+              )}
             </Button>
-          )}
+          </div>
         </div>
 
         {!cartStarted ? (
@@ -321,27 +341,6 @@ export default function Home() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-      </div>
-
-      {/* Bottone sticky per navigare ai carrelli completati */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background border-t z-50 p-4">
-        <div className="container mx-auto px-3 md:px-4 max-w-6xl">
-          <Button
-            onClick={() => setLocation("/carrelli-completati")}
-            size="lg"
-            className="w-full h-14 gap-3 text-lg font-semibold"
-            data-testid="button-view-completed-carts"
-          >
-            <ShoppingCart className="h-6 w-6" />
-            <span className="flex-1">Vedi Carrelli Completati</span>
-            {completedCarts.length > 0 && (
-              <Badge variant="secondary" className="h-7 px-3 text-base font-bold">
-                {completedCarts.length}
-              </Badge>
-            )}
-            <ArrowRight className="h-6 w-6" />
-          </Button>
-        </div>
       </div>
     </div>
   );
