@@ -59,7 +59,8 @@ export default function Home() {
   const currentTotal = packages.reduce((sum, pkg) => sum + pkg.quantity, 0);
   const maxPackages = currentCart?.maxPackages || 72;
   const completedCarts = allCarts.filter(c => c.isCompleted === 1);
-  const currentCartNumber = allCarts.length + 1;
+  // Numerazione basata solo sui carrelli completati: se 0 completati -> Carrello 1, se 3 completati -> Carrello 4
+  const currentCartNumber = completedCarts.length + 1;
 
   // Create cart mutation
   const createCartMutation = useMutation({
