@@ -34,7 +34,7 @@ export default function AddPackageForm({ onAddPackage, disabled }: AddPackageFor
   const isValid = variety && length && quantity && parseInt(quantity) > 0;
 
   return (
-    <Card className="w-full sticky top-[120px] md:top-0 md:relative z-30 shadow-lg md:shadow-sm">
+    <Card className="w-full shadow-sm">
       <CardHeader className="pb-3 md:pb-6">
         <CardTitle className="text-lg md:text-xl">Aggiungi Pacco</CardTitle>
       </CardHeader>
