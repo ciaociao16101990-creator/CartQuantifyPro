@@ -54,6 +54,15 @@ export default function Home() {
 
   const [, setLocation] = useLocation();
   
+  // Auto-carica carrello attivo se esiste (quando torni da Carrelli Completati)
+  useEffect(() => {
+    const activeCart = allCarts.find(c => c.isCompleted === 0);
+    if (activeCart && !cartStarted) {
+      setCartStarted(true);
+      setCurrentCartId(activeCart.id);
+    }
+  }, [allCarts, cartStarted]);
+  
   const currentCart = currentCartData;
   const packages = currentCart?.packages || [];
   const currentTotal = packages.reduce((sum, pkg) => sum + pkg.quantity, 0);
@@ -80,11 +89,6 @@ export default function Home() {
       queryClient.invalidateQueries({ queryKey: ['/api/carts'] });
       setCurrentCartId(data.id);
       setCartStarted(true);
-      toast({
-        variant: "success",
-        title: "Carrello avviato",
-        description: "Pronto per l'aggiunta di pacchi",
-      });
     },
   });
 
@@ -102,12 +106,6 @@ export default function Home() {
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['/api/carts'] });
       queryClient.invalidateQueries({ queryKey: ['/api/carts', currentCartId] });
-      
-      toast({
-        variant: "success",
-        title: "Pacco aggiunto",
-        description: `${variables.variety} - ${variables.length}cm (Qty: ${variables.quantity})`,
-      });
     },
   });
 
