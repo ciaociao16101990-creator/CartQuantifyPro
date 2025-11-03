@@ -220,6 +220,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete completed cart
+  app.delete("/api/carts/:id", async (req, res) => {
+    try {
+      const cart = await db.query.carts.findFirst({
+        where: eq(carts.id, req.params.id),
+      });
+      
+      if (!cart) {
+        return res.status(404).json({ error: "Carrello non trovato" });
+      }
+      
+      if (cart.isCompleted === 0) {
+        return res.status(400).json({ error: "Impossibile eliminare un carrello non completato" });
+      }
+      
+      // Delete cart (packages will be deleted automatically due to CASCADE)
+      await db.delete(carts).where(eq(carts.id, req.params.id));
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting cart:", error);
+      res.status(500).json({ error: "Eliminazione carrello fallita" });
+    }
+  });
+
   // Export all carts to Excel
   app.get("/api/export/excel", async (req, res) => {
     try {
