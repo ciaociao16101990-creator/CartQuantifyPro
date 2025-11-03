@@ -2,9 +2,7 @@ services:
   - type: web
     name: cartquantifypro
     env: node
-    plan: free
     branch: main
-    buildCommand: |
-      npm ci --include=dev
-      npm run build
-    startCommand: npm start
+    plan: free
+    buildCommand: "npm install --include=dev && npm run build"
+    startCommand: "npm start"
