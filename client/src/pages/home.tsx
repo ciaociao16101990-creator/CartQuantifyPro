@@ -42,6 +42,7 @@ export default function Home() {
   const [showCompletedDialog, setShowCompletedDialog] = useState(false);
   const [completedCartData, setCompletedCartData] = useState<CartSetupData | null>(null);
   const [lastCompletedCartId, setLastCompletedCartId] = useState<string | null>(null);
+  const [isDeletingCart, setIsDeletingCart] = useState(false);
 
   // Fetch all carts
   const { data: allCarts = [] } = useQuery<CartWithPackages[]>({
@@ -60,11 +61,11 @@ export default function Home() {
   // Auto-carica carrello attivo se esiste (quando torni da Carrelli Completati)
   useEffect(() => {
     const activeCart = allCarts.find(c => c.isCompleted === 0);
-    if (activeCart && !cartStarted) {
+    if (activeCart && !cartStarted && !isDeletingCart) {
       setCartStarted(true);
       setCurrentCartId(activeCart.id);
     }
-  }, [allCarts, cartStarted]);
+  }, [allCarts, cartStarted, isDeletingCart]);
   
   const currentCart = currentCartData;
   const packages = currentCart?.packages || [];
@@ -173,17 +174,22 @@ export default function Home() {
 
   const confirmBackToSetup = async () => {
     setShowResetDialog(false);
+    setIsDeletingCart(true);
+    
+    const cartIdToDelete = currentCartId;
     setCartStarted(false);
     setCurrentCartId(null);
     
-    if (currentCartId) {
+    if (cartIdToDelete) {
       try {
-        await apiRequest('DELETE', `/api/carts/${currentCartId}`);
-        queryClient.invalidateQueries({ queryKey: ['/api/carts'] });
+        await apiRequest('DELETE', `/api/carts/${cartIdToDelete}`);
+        await queryClient.invalidateQueries({ queryKey: ['/api/carts'] });
       } catch (error) {
         console.error("Error deleting cart:", error);
       }
     }
+    
+    setIsDeletingCart(false);
   };
 
   const handleCompletedDialogConfirm = () => {
