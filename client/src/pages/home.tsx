@@ -78,6 +78,7 @@ export default function Home() {
       setCurrentCartId(data.id);
       setCartStarted(true);
       toast({
+        variant: "success",
         title: "Carrello avviato",
         description: `Carrello ${data.cartNumber} pronto per l'aggiunta di pacchi`,
       });
@@ -100,6 +101,7 @@ export default function Home() {
       queryClient.invalidateQueries({ queryKey: ['/api/carts', currentCartId] });
       
       toast({
+        variant: "success",
         title: "Pacco aggiunto",
         description: `${variables.variety} - ${variables.length}cm (Qty: ${variables.quantity})`,
       });
@@ -122,6 +124,7 @@ export default function Home() {
       setShowEditDialog(false);
       
       toast({
+        variant: "success",
         title: "Pacco aggiornato",
         description: `${variables.variety} - ${variables.length}cm (Qty: ${variables.quantity})`,
       });
@@ -150,7 +153,8 @@ export default function Home() {
     if (currentCart && currentCart.isCompleted === 1) {
       // Cart was completed, show toast
       toast({
-        title: `Carrello ${currentCart.cartNumber} completato! ✓`,
+        variant: "success",
+        title: `Carrello ${currentCart.cartNumber} completato!`,
         description: `Automaticamente avviato Carrello ${currentCart.cartNumber + 1}`,
       });
       
@@ -182,6 +186,7 @@ export default function Home() {
     setCurrentCartId(null);
     setShowResetDialog(false);
     toast({
+      variant: "default",
       title: "Carrello resettato",
       description: "Puoi configurare un nuovo carrello",
     });
@@ -244,6 +249,7 @@ export default function Home() {
       window.URL.revokeObjectURL(url);
       
       toast({
+        variant: "success",
         title: "Esportazione completata",
         description: `${completedCarts.length} carrelli esportati con successo`,
       });
