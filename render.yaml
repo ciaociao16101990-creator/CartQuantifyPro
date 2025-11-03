@@ -1,8 +1,0 @@
-services:
-  - type: web
-    name: cartquantifypro
-    env: node
-    branch: main
-    plan: free
-    buildCommand: "npm install --include=dev && npm run build"
-    startCommand: "npm start"
