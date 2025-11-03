@@ -173,7 +173,7 @@ export default function CompletedCarts() {
                           </div>
                           <div className="flex-1 text-left">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <h3 className="font-semibold text-lg">Carrello {cart.cartNumber}</h3>
+                              <h3 className="font-semibold text-lg">Carrello completato</h3>
                               <Badge variant="default" className="bg-green-600 dark:bg-green-500 gap-1 h-7">
                                 <ShoppingCart className="h-3.5 w-3.5" />
                                 {cart.totalPackages} pacchi
@@ -206,7 +206,7 @@ export default function CompletedCarts() {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Elimina Carrello {cart.cartNumber}?</AlertDialogTitle>
+                            <AlertDialogTitle>Elimina carrello?</AlertDialogTitle>
                             <AlertDialogDescription>
                               Questa azione non può essere annullata. Il carrello e tutti i suoi pacchi verranno eliminati definitivamente.
                             </AlertDialogDescription>

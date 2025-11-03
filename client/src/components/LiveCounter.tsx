@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 interface LiveCounterProps {
   current: number;
   total: number;
-  cartNumber: number;
   destination?: string;
   tag?: string;
   bucketType?: string;
@@ -15,7 +14,6 @@ interface LiveCounterProps {
 export default function LiveCounter({ 
   current, 
   total, 
-  cartNumber,
   destination,
   tag,
   bucketType 
@@ -49,9 +47,9 @@ export default function LiveCounter({
                 )} />
               </div>
               <div>
-                <h3 className="text-xl md:text-lg font-bold">Carrello {cartNumber}</h3>
+                <h3 className="text-xl md:text-lg font-bold">Carrello in corso</h3>
                 <p className="text-xs text-muted-foreground">
-                  {isComplete ? "Completato!" : isNearComplete ? "Quasi completo" : "In corso"}
+                  {isComplete ? "Completato!" : isNearComplete ? "Quasi completo" : "In lavorazione"}
                 </p>
               </div>
             </div>

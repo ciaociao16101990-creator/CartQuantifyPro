@@ -54,18 +54,6 @@ export default function Home() {
 
   const [, setLocation] = useLocation();
   
-  // Sincronizza stato locale con il database
-  useEffect(() => {
-    const activeCart = allCarts.find(c => c.isCompleted === 0);
-    if (activeCart && (!cartStarted || currentCartId !== activeCart.id)) {
-      setCartStarted(true);
-      setCurrentCartId(activeCart.id);
-    } else if (!activeCart && cartStarted) {
-      setCartStarted(false);
-      setCurrentCartId(null);
-    }
-  }, [allCarts, cartStarted, currentCartId]);
-
   const currentCart = currentCartData;
   const packages = currentCart?.packages || [];
   const currentTotal = packages.reduce((sum, pkg) => sum + pkg.quantity, 0);
@@ -95,7 +83,7 @@ export default function Home() {
       toast({
         variant: "success",
         title: "Carrello avviato",
-        description: `Carrello ${data.cartNumber} pronto per l'aggiunta di pacchi`,
+        description: "Pronto per l'aggiunta di pacchi",
       });
     },
   });
@@ -169,8 +157,8 @@ export default function Home() {
       // Cart was completed, show toast
       toast({
         variant: "success",
-        title: `Carrello ${currentCart.cartNumber} completato!`,
-        description: `Automaticamente avviato Carrello ${currentCart.cartNumber + 1}`,
+        title: "Carrello completato!",
+        description: "Automaticamente avviato nuovo carrello",
       });
       
       // Auto-start new cart with same settings
@@ -188,21 +176,17 @@ export default function Home() {
     createCartMutation.mutate(setup);
   };
 
-  const handleResetCart = () => {
-    if (packages.length > 0) {
-      setShowResetDialog(true);
-    } else {
-      confirmReset();
-    }
+  const handleBackToSetup = () => {
+    setShowResetDialog(true);
   };
 
-  const confirmReset = () => {
+  const confirmBackToSetup = () => {
     setCartStarted(false);
     setCurrentCartId(null);
     setShowResetDialog(false);
     toast({
       variant: "default",
-      title: "Carrello resettato",
+      title: "Carrello interrotto",
       description: "Puoi configurare un nuovo carrello",
     });
   };
@@ -264,12 +248,12 @@ export default function Home() {
               <Button
                 variant="outline"
                 size="lg"
-                onClick={handleResetCart}
+                onClick={handleBackToSetup}
                 className="flex-shrink-0 h-12 md:h-11"
                 data-testid="button-back-to-setup"
               >
                 <ChevronLeft className="h-5 w-5 md:mr-2" />
-                <span className="hidden md:inline">Modifica</span>
+                <span className="hidden md:inline">Indietro</span>
               </Button>
             )}
             
@@ -301,7 +285,6 @@ export default function Home() {
             <LiveCounter
               current={currentTotal}
               total={maxPackages}
-              cartNumber={currentCart.cartNumber}
               destination={currentCart.destination}
               tag={currentCart.tag}
               bucketType={currentCart.bucketType}
@@ -335,10 +318,9 @@ export default function Home() {
         <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
           <AlertDialogContent className="max-w-[95vw] md:max-w-md">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-xl">Conferma Reset</AlertDialogTitle>
+              <AlertDialogTitle className="text-xl">Attenzione</AlertDialogTitle>
               <AlertDialogDescription className="text-base">
-                Hai {packages.length} {packages.length === 1 ? 'pacco' : 'pacchi'} nel carrello corrente.
-                Tornare alla configurazione cancellerà tutti i pacchi non salvati. Sei sicuro?
+                Se procedi, perderai il carrello in corso con tutti i pacchi non salvati. Vuoi continuare?
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="gap-2 sm:gap-0">
@@ -346,11 +328,11 @@ export default function Home() {
                 Annulla
               </AlertDialogCancel>
               <AlertDialogAction 
-                onClick={confirmReset}
+                onClick={confirmBackToSetup}
                 className="h-12 md:h-11 text-base md:text-sm"
-                data-testid="button-confirm-reset"
+                data-testid="button-confirm-back"
               >
-                Sì, Resetta
+                Sì, Torna Indietro
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
