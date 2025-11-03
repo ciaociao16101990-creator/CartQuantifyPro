@@ -54,6 +54,18 @@ export default function Home() {
 
   const [, setLocation] = useLocation();
   
+  // Sincronizza stato locale con il database
+  useEffect(() => {
+    const activeCart = allCarts.find(c => c.isCompleted === 0);
+    if (activeCart && (!cartStarted || currentCartId !== activeCart.id)) {
+      setCartStarted(true);
+      setCurrentCartId(activeCart.id);
+    } else if (!activeCart && cartStarted) {
+      setCartStarted(false);
+      setCurrentCartId(null);
+    }
+  }, [allCarts, cartStarted, currentCartId]);
+
   const currentCart = currentCartData;
   const packages = currentCart?.packages || [];
   const currentTotal = packages.reduce((sum, pkg) => sum + pkg.quantity, 0);
