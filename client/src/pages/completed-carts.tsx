@@ -59,11 +59,6 @@ export default function CompletedCarts() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/carts"] });
-      toast({
-        title: "Carrello eliminato",
-        description: "Il carrello è stato eliminato con successo",
-        variant: "success",
-      });
     },
     onError: () => {
       toast({

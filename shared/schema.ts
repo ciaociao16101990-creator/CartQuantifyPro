@@ -63,7 +63,7 @@ export const VARIETIES = [
   "MATTH IRON WHITE",
 ] as const;
 
-export const STEM_LENGTHS = [50, 55, 60, 65, 70, 75] as const;
+export const STEM_LENGTHS = [75, 70, 65, 60, 55, 50] as const;
 
 export const DESTINATIONS = [
   "AALSMEER (N.11)",

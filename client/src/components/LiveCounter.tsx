@@ -24,7 +24,7 @@ export default function LiveCounter({
 
   return (
     <Card className={cn(
-      "w-full sticky top-0 z-40 shadow-xl border-2 transition-all duration-300",
+      "w-full shadow-xl border-2 transition-all duration-300",
       isComplete && "border-green-500/30 bg-green-500/5 dark:bg-green-500/10",
       isNearComplete && "border-amber-500/30 bg-amber-500/5 dark:bg-amber-500/10",
       !isComplete && !isNearComplete && "border-primary/20"

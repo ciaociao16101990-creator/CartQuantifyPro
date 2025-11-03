@@ -140,11 +140,6 @@ export default function Home() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/carts'] });
       queryClient.invalidateQueries({ queryKey: ['/api/carts', currentCartId] });
-      
-      toast({
-        title: "Pacco eliminato",
-        description: "Il pacco è stato rimosso dal carrello",
-      });
     },
   });
 
