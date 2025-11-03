@@ -41,6 +41,7 @@ export default function Home() {
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [showCompletedDialog, setShowCompletedDialog] = useState(false);
   const [completedCartData, setCompletedCartData] = useState<CartSetupData | null>(null);
+  const [lastCompletedCartId, setLastCompletedCartId] = useState<string | null>(null);
 
   // Fetch all carts
   const { data: allCarts = [] } = useQuery<CartWithPackages[]>({
@@ -148,17 +149,19 @@ export default function Home() {
 
   // Check if current cart was auto-completed by backend
   useEffect(() => {
-    if (currentCart && currentCart.isCompleted === 1 && !showCompletedDialog) {
+    if (currentCart && currentCart.isCompleted === 1 && currentCart.id !== lastCompletedCartId) {
       // Save cart data for new cart creation
       setCompletedCartData({
         destination: currentCart.destination,
         tag: currentCart.tag,
         bucketType: currentCart.bucketType,
       });
+      // Mark this cart as already shown
+      setLastCompletedCartId(currentCart.id);
       // Show completion dialog
       setShowCompletedDialog(true);
     }
-  }, [currentCart?.isCompleted, showCompletedDialog]);
+  }, [currentCart?.isCompleted, currentCart?.id, lastCompletedCartId]);
 
   const handleStartCart = (setup: CartSetupData) => {
     createCartMutation.mutate(setup);
@@ -185,7 +188,7 @@ export default function Home() {
 
   const handleCompletedDialogConfirm = () => {
     setShowCompletedDialog(false);
-    if (completedCartData) {
+    if (completedCartData && !createCartMutation.isPending) {
       createCartMutation.mutate(completedCartData);
       setCompletedCartData(null);
     }
