@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerFooter,
+} from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -42,16 +48,13 @@ export default function EditPackageDialog({ open, onOpenChange, package: pkg, on
   const isValid = variety && length && quantity && parseInt(quantity) > 0;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
-        className="fixed bottom-0 left-0 right-0 max-w-full rounded-t-xl rounded-b-none border-t border-x-0 border-b-0 p-4 translate-y-0 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom sm:max-w-md sm:left-1/2 sm:-translate-x-1/2 sm:bottom-4 sm:rounded-xl sm:border" 
-        data-testid="dialog-edit-package"
-      >
-        <DialogHeader className="pb-2">
-          <DialogTitle className="text-lg">Modifica Pacco</DialogTitle>
-        </DialogHeader>
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent data-testid="dialog-edit-package">
+        <DrawerHeader className="text-left">
+          <DrawerTitle className="text-lg">Modifica Pacco</DrawerTitle>
+        </DrawerHeader>
 
-        <div className="space-y-3">
+        <div className="px-4 space-y-3">
           <div className="space-y-1">
             <Label htmlFor="edit-variety" className="text-sm">Varietà</Label>
             <Select value={variety} onValueChange={setVariety}>
@@ -98,7 +101,7 @@ export default function EditPackageDialog({ open, onOpenChange, package: pkg, on
           </div>
         </div>
 
-        <DialogFooter className="gap-2 pt-3">
+        <DrawerFooter className="flex flex-row gap-2">
           <Button 
             variant="outline" 
             onClick={() => onOpenChange(false)} 
@@ -115,8 +118,8 @@ export default function EditPackageDialog({ open, onOpenChange, package: pkg, on
           >
             Salva
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   );
 }
