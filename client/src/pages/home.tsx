@@ -5,12 +5,12 @@ import LiveCounter from "@/components/LiveCounter";
 import AddPackageForm from "@/components/AddPackageForm";
 import PackageList, { type PackageItem } from "@/components/PackageList";
 import EditPackageDialog from "@/components/EditPackageDialog";
-import CompletedCarts, { type CompletedCart } from "@/components/CompletedCarts";
-import ExportButton from "@/components/ExportButton";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ChevronLeft, ShoppingCart, ArrowRight } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useLocation } from "wouter";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,6 +52,8 @@ export default function Home() {
     refetchInterval: currentCartId ? 2000 : false, // Poll every 2 seconds
   });
 
+  const [, setLocation] = useLocation();
+  
   const currentCart = currentCartData;
   const packages = currentCart?.packages || [];
   const currentTotal = packages.reduce((sum, pkg) => sum + pkg.quantity, 0);
@@ -235,33 +237,6 @@ export default function Home() {
     deletePackageMutation.mutate(id);
   };
 
-  const handleExport = async () => {
-    try {
-      const response = await fetch('/api/export/excel');
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `carrelli_export_${new Date().toISOString().split('T')[0]}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-      
-      toast({
-        variant: "success",
-        title: "Esportazione completata",
-        description: `${completedCarts.length} carrelli esportati con successo`,
-      });
-    } catch (error) {
-      toast({
-        title: "Errore",
-        description: "Impossibile esportare i dati",
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-6">
       <div className="container mx-auto px-3 md:px-4 py-4 md:py-6 max-w-6xl space-y-4 md:space-y-6">
@@ -316,26 +291,6 @@ export default function Home() {
           </>
         ) : null}
 
-        {completedCarts.length > 0 && (
-          <CompletedCarts 
-            carts={completedCarts.map(cart => ({
-              id: cart.id,
-              cartNumber: cart.cartNumber,
-              destination: cart.destination,
-              tag: cart.tag,
-              bucketType: cart.bucketType,
-              totalPackages: cart.totalPackages,
-              packages: cart.packages.map(p => ({
-                id: p.id,
-                variety: p.variety,
-                length: p.length,
-                quantity: p.quantity,
-              })),
-              completedAt: cart.completedAt ? new Date(cart.completedAt) : new Date(),
-            }))}
-          />
-        )}
-
         <EditPackageDialog
           open={showEditDialog}
           onOpenChange={setShowEditDialog}
@@ -366,11 +321,27 @@ export default function Home() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+      </div>
 
-        <ExportButton
-          cartCount={completedCarts.length}
-          onExport={handleExport}
-        />
+      {/* Bottone sticky per navigare ai carrelli completati */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background border-t z-50 p-4">
+        <div className="container mx-auto px-3 md:px-4 max-w-6xl">
+          <Button
+            onClick={() => setLocation("/carrelli-completati")}
+            size="lg"
+            className="w-full h-14 gap-3 text-lg font-semibold"
+            data-testid="button-view-completed-carts"
+          >
+            <ShoppingCart className="h-6 w-6" />
+            <span className="flex-1">Vedi Carrelli Completati</span>
+            {completedCarts.length > 0 && (
+              <Badge variant="secondary" className="h-7 px-3 text-base font-bold">
+                {completedCarts.length}
+              </Badge>
+            )}
+            <ArrowRight className="h-6 w-6" />
+          </Button>
+        </div>
       </div>
     </div>
   );
