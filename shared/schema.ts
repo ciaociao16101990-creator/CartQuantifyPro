@@ -58,9 +58,9 @@ export const VARIETIES = [
   "MATTH IRON MARINE",
   "MATTH IRON ROSE",
   "MATTH IRON PURPLE",
+  "MATTH IRON CHERRY BL",
   "MATTH GEM",
   "MATTH IRON YELLOW",
-  "MATTH IRON WHITE",
 ] as const;
 
 export const STEM_LENGTHS = [75, 70, 65, 60, 55, 50] as const;
